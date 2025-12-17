@@ -90,6 +90,11 @@ h1 {
     text-shadow: 0 0 20px var(--accent), 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
 
+a {
+    color: var(--ink-soft);
+    text-shadow: 0 0 20px var(--accent), 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
 .sub {
     margin: 0 0 16px;
     color: var(--ink-soft);
