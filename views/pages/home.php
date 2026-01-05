@@ -13,6 +13,8 @@ $total = $total ?? 0;
     </div>
 </section>
 
+<a href="/random" class="btn">🎲 Random game</a>
+
 <?php foreach ($games as $game): ?>
     <article class="card">
         <h2 class="card__title"><?= $game['title'] ?></h2>
@@ -22,7 +24,7 @@ $total = $total ?? 0;
             <span class="badge"><?= $game['genre'] ?></span>
             <span class="badge"><?= (int)$game['releaseYear'] ?></span>
             <span class="badge"><?= (int)$game['rating'] ?>/10</span>
-            <span class="badge"><a href="/?page=detail&id=<?= $game['id'] ?>">Naviguer vers le détail</a></span>
         </div>
+        <a href="/games/<?= $game['id'] ?>">Naviguer vers le détail</a>
     </article>
 <?php endforeach; ?>

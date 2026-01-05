@@ -1,28 +1,36 @@
 <?php
+
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../repositories/GamesRepository.php';
-function gamRepository() : GamesRepository
-{
-    //static $repo = null;
+
+function gameRepository() : GamesRepository {
     return new GamesRepository(db());
 }
-function getAllSortedByRating() : array {
-return gamRepository()->getAllSortedByRating();
+
+function getAllGamesSortedByRating() : array {
+    return gameRepository()->findAllSortedByRating();
 }
+
 function getAllGames() : array {
-    return gamRepository()->getAllGames();
-}
-function getLimitedGames(int $id) : array
-{
-    return gamRepository()->findTop($id);
+    return gameRepository()->findAll();
 }
 
-function countAll() : int
-{
-    return gamRepository()->countAll();
+function getLimitedGames(int $id) : array {
+    return gameRepository()->findTop($id);
 }
 
-function getGameById(int $id): ?array
-{
-    return gamRepository()->findById($id);
+function countAll() : int {
+    return gameRepository()->countAll();
+}
+
+function getGameById(int $id) : ?array {
+    return gameRepository()->findById($id);
+}
+
+function getRandomGame() {
+    return gameRepository()->findRandom();
+}
+
+function createGame(array $data) : int {
+    return gameRepository()->createGame($data);
 }
