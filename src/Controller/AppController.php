@@ -2,68 +2,44 @@
 
 namespace Controller;
 
+use Core\Request;
 use Core\Session;
+use Helper\Debug;
 use JetBrains\PhpStorm\NoReturn;
 use Core\Response;
 use Repository\GamesRepository;
 
-require_once __DIR__ . '/../services/games.php';
-require_once __DIR__ . '/../helpers/debug.php';
+require_once __DIR__ . '/../Helper/Debug.php';
 
 final readonly class AppController {
 
     public function __construct(
-        private Response $response),
-    private GamesRepository $gamesRepository,
-    private Session $session,
-    {}
-    public function handleRequest (string $path) : void {
+        private Response $response,
+        private GamesRepository $gamesRepository,
+        private Session $session,
+        private Request $request,
+    ) {}
 
-        if (preg_match('#^/games/(\d+)$#', $path, $m)) {
-            $this->gameById((int)$m[1]);
-            return;
-        }
-
-        switch ($path) {
-            case '/':
-                $this->home();
-                break;
-            case '/random':
-                $this->random();
-            case '/add':
-                $this->add();
-                break;
-            case '/games':
-                $this->games();
-                break;
-            default:
-                $this->notFound();
-                break;
-        }
-    }
-
-    private function home() : void {
-        $games = getLimitedGames(3);
+    public function home() : void {
+        $games = $this->gamesRepository->findTop(3);
 
         $this->response->render('home', [
             'featuredGames' => $games,
-            'total' => countAll()
+            'total' => $this->gamesRepository->countAll()
         ]);
     }
 
-    private function games() : void {
-        $games = getAllGamesSortedByRating();
+    public function games() : void {
+        $games = $this->gamesRepository->findAllSortedByRating();
 
         $this->response->render('games', [
             'games' => $games
         ]);
     }
 
-    private function gameById (int $id) : void {
-        $game = getGameById($id);
-
-        $success = $_SESSION['flash_success'] ?? null;
-        unset($_SESSION['flash_success']);
+    public function gameById (int $id) : void {
+        $game = $this->gamesRepository->findById($id);
+        $success = $this->session->pullFlash('success');
         $this->response->render('detail', [
             'id' => $id,
             'game' => $game,
@@ -71,17 +47,17 @@ final readonly class AppController {
         ]);
     }
 
-    private function notFound() : void {
+    public function notFound() : void {
         $this->response->render('not-found', [], 404);
     }
 
     #[NoReturn]
-    private function random() : void {
-        $lastId = $_SESSION['last_random_id'] ?? 0;
+    public function random() : void {
+        $lastId = $this->session->get('last_random_id') ?? null;
         $game = null;
 
         for ($i = 0; $i < 5; $i++) {
-            $candidate = getRandomGame();
+            $candidate = $this->gamesRepository->findRandom();
 
             if ($candidate['id'] !== $lastId) {
                 $game = $candidate;
@@ -89,13 +65,14 @@ final readonly class AppController {
         }
 
         $id = $game['id'];
-        $_SESSION['last_random_id'] = $id;
+
+        $this->session->set('last_random_id', $id);
 
         $this->response->redirect('/games/' . $id);
     }
 
-    private function add(): void {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    public function add(): void {
+        if ($this->request->isPost()) {
             $this->handleAddGame();
             return;
         }
@@ -103,14 +80,14 @@ final readonly class AppController {
         $this->response->render('add', []);
     }
 
-    private function handleAddGame() : void {
-        $title = trim($_POST['title']);
-        $platform = trim($_POST['platform']);
-        $genre = trim($_POST['genre']);
-        $releaseYear = (int)($_POST['releaseYear']);
-        $rating = (int)($_POST['rating']);
-        $description = trim($_POST['description']);
-        $notes = trim($_POST['notes']);
+    public function handleAddGame() : void {
+        $title = trim($this->request->post('title'));
+        $platform = trim($this->request->post('platform'));
+        $genre = trim($this->request->post('genre'));
+        $releaseYear = (int)($this->request->post('releaseYear'));
+        $rating = (int)($this->request->post('rating'));
+        $description = trim($this->request->post('description'));
+        $notes = trim($this->request->post('notes'));
 
         $errors = [];
 
@@ -120,7 +97,6 @@ final readonly class AppController {
         if ($rating < 0 || $rating > 10) $errors['rating'] = 'Rating should be between 0 and 10';
         if ($releaseYear < 1800 || $releaseYear > (int)date('Y')) $errors['releaseYear'] = 'Release year should be between 1800 and 2025';
         if ($description === '') $errors['description'] = 'Description should not be empty';
-        if ($notes === '') $errors['notes'] = 'Note should not be empty';
 
         $old = [
             'title' => $title,
@@ -137,8 +113,9 @@ final readonly class AppController {
             return;
         }
 
-        $newGameId = createGame($old);
-        $_SESSION['flash_success'] = 'Game added successfully';
+        $newGameId = $this->gamesRepository->createGame($old);
+
+        $this->session->flash('success', 'Game added successfully 🎉🎉');
 
         $this->response->redirect('/games/' . $newGameId);
     }
