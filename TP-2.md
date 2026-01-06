@@ -104,6 +104,72 @@ Configurer Angular pour :
 - organiser le projet par responsabilités
 
 ---
+## INFO UPDATE XAVIER
+
+Type de rangement :
+
+games-frontend/
+
+├── src/
+
+│   ├── app/
+
+│   │   ├── core/                    # Services singleton, guards, interceptors
+
+│   │   │   └── services/
+
+│   │   │       └── api.service.ts
+
+│   │   ├── shared/                  # Composants, directives, pipes partagés
+
+│   │   │   └── models/
+
+│   │   │       ├── game.model.ts
+
+│   │   │       └── rating-stat.model.ts
+
+│   │   ├── features/                # Modules fonctionnels
+
+│   │   │   ├── games/
+
+│   │   │   │   ├── pages/
+
+│   │   │   │   │   ├── games-list/
+
+│   │   │   │   │   ├── game-detail/
+
+│   │   │   │   │   └── games-top/
+
+│   │   │   │   ├── services/
+
+│   │   │   │   │   └── games. service.ts
+
+│   │   │   │   └── games-routing.module.ts
+
+│   │   │   └── stats/
+
+│   │   │       ├── pages/
+
+│   │   │       │   └── ratings-stats/
+
+│   │   │       └── services/
+
+│   │   │           └── stats.service.ts
+
+│   │   ├── app.component.ts
+
+│   │   ├── app.component.html
+
+│   │   ├── app.routes.ts
+
+│   │   └── app.config.ts
+
+│   └── environments/
+
+│       ├── environment.ts
+
+│       └── environment.prod.ts
+
 
 ### B2) Créer les modèles TypeScript
 
